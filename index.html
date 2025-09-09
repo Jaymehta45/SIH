@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B700%3B900&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>OceanIQ - Crowdsourced Early Warning for Ocean Hazards</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+        :root {
+            --primary-color: #0077C2;
+        }
+        @keyframes wave-ebb-flow {
+            0% {
+                transform: translateX(0) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.15);
+            }
+            100% {
+                transform: translateX(0) scale(1);
+            }
+        }
+        @keyframes wave-ebb-flow-reverse {
+            0% {
+                transform: translateX(0) scale(1);
+            }
+            50% {
+                transform: translateX(50%) scale(1.15);
+            }
+            100% {
+                transform: translateX(0) scale(1);
+            }
+        }
+        @keyframes light-refraction {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .ocean-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(170deg, #E0F7FA, #B3E5FC, #81D4FA);
+            background-size: 200% 200%;
+            animation: light-refraction 30s ease infinite;
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: -50%;
+            width: 200%;
+            height: 450px;
+            background-repeat: repeat-x;
+            background-position: 0 bottom;
+            animation-timing-function: cubic-bezier(0.36, 0.45, 0.63, 0.53);
+            opacity: 1;
+        }
+        .wave.one {
+            background-image: url('data:image/svg+xml;utf8,<svg width="2000" height="450" viewBox="0 0 2000 450" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.8);stop-opacity:1" /><stop offset="100%" style="stop-color:rgba(179,229,252,0);stop-opacity:1" /></linearGradient></defs><path d="M0,250 C400,100 600,400 1000,250 S1400,400 2000,250 L2000,450 L0,450 Z" fill="rgba(129, 212, 250, 0.6)"></path><path d="M0,250 C400,100 600,400 1000,250 S1400,400 2000,250" fill="none" stroke="url(%23grad1)" stroke-width="3" /></svg>');
+            animation: wave-ebb-flow 18s infinite;
+            animation-delay: -3s;
+            bottom: -30px;
+        }
+        .wave.two {
+            background-image: url('data:image/svg+xml;utf8,<svg width="2000" height="450" viewBox="0 0 2000 450" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.6);stop-opacity:1" /><stop offset="100%" style="stop-color:rgba(79,195,247,0);stop-opacity:1" /></linearGradient></defs><path d="M0,280 C350,150 650,410 1000,280 S1350,410 2000,280 L2000,450 L0,450 Z" fill="rgba(79, 195, 247, 0.5)"></path><path d="M0,280 C350,150 650,410 1000,280 S1350,410 2000,280" fill="none" stroke="url(%23grad2)" stroke-width="2.5" /></svg>');
+            animation: wave-ebb-flow-reverse 25s infinite;
+            animation-delay: -1s;
+            bottom: -15px;
+        }
+        .wave.three {
+             background-image: url('data:image/svg+xml;utf8,<svg width="2000" height="450" viewBox="0 0 2000 450" xmlns="http://www.w3.org/2000/svg"><path d="M0,260 C500,320 700,200 1000,260 S1500,200 2000,260 L2000,450 L0,450 Z" fill="rgba(41, 182, 246, 0.7)"></path></svg>');
+            animation: wave-ebb-flow 15s infinite;
+            animation-delay: -6s;
+            bottom: 0px;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out forwards;
+            opacity: 0;
+        }
+        .fade-in-delay-1 {
+            animation-delay: 0.2s;
+        }
+        .fade-in-delay-2 {
+            animation-delay: 0.4s;
+        }
+        .fade-in-delay-3 {
+            animation-delay: 0.6s;
+        }
+        .fade-in-delay-4 {
+            animation-delay: 0.8s;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .navbar {
+            transition: all 0.3s ease-in-out;
+        }
+        .navbar-scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .map-marker {
+            animation: drop 1s ease-out forwards, pulse 2s infinite ease-in-out 1s;
+            transform-origin: bottom center;
+            opacity: 0;
+        }
+        @keyframes drop {
+            from {
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        .map-container:hover .map-image {
+            transform: scale(1.1) rotate(2deg);
+        }
+        .form-input {
+            @apply block w-full rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[var(--primary-color)] sm:text-sm sm:leading-6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .confirmation-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirmation-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .confirmation-modal-content {
+            position: relative;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            margin: 1rem;
+            width: 100%;
+            max-width: 28rem;
+            text-align: center;
+            transform: scale(1);
+            transition: all 0.3s ease;
+        }
+        
+        html {
+  scroll-behavior: smooth;
+}
+    </style>
+    
+</head>
+<body class="bg-slate-50" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="relative min-h-screen flex flex-col group/design-root overflow-x-hidden">
+<header class="navbar fixed top-0 left-0 right-0 z-50 flex items-center justify-between whitespace-nowrap px-6 sm:px-10 py-3" id="navbar">
+<div class="flex items-center gap-2 text-slate-800">
+<h2 class="text-2xl font-bold leading-tight tracking-tighter fade-in">🌊 OceanIQ</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors fade-in fade-in-delay-1" href="#home">HOME</a>
+<a class="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors fade-in fade-in-delay-2" href="#map">MAP</a>
+<a class="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors fade-in fade-in-delay-3" href="#reports">PAST REPORTS</a>
+<a class="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors fade-in fade-in-delay-4" href="#about">ABOUT</a>
+</nav>
+<div class="flex items-center gap-2">
+<a class="hidden sm:block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors fade-in fade-in-delay-4" href="#">Login / Signup</a>
+<button class="md:hidden flex items-center justify-center p-2 rounded-md text-slate-600 hover:bg-slate-200/50">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+
+<!-- Hero Section -->
+<main id="home" class="relative flex-grow flex items-center justify-center min-h-screen">
+<div class="ocean-bg">
+<div class="wave one"></div>
+<div class="wave two"></div>
+<div class="wave three"></div>
+</div>
+<div class="relative z-10 text-center px-4 py-20 sm:py-32">
+<div class="max-w-3xl mx-auto">
+<h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-slate-800 fade-in">
+                        Crowdsourced Early Warning for Ocean Hazards
+                    </h1>
+<p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 fade-in fade-in-delay-1">
+                        Join a community dedicated to ocean safety. Report hazards in real-time, stay informed about potential dangers, and help protect our coastlines.
+                    </p>
+<div class="mt-8 flex flex-wrap gap-3 justify-center fade-in fade-in-delay-2">
+<button onclick="openReportModal()" class="flex min-w-[140px] items-center justify-center rounded-md h-12 px-6 bg-[var(--primary-color)] text-white text-base font-bold shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105">
+<span class="truncate">Report Hazard</span>
+</button>
+<button class="flex min-w-[140px] items-center justify-center rounded-md h-12 px-6 bg-white/50 backdrop-blur-sm border border-slate-300 text-slate-700 text-base font-bold shadow-lg hover:bg-white/80 transition-all duration-300 transform hover:scale-105">
+<span class="truncate">Login / Signup</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+
+<!-- Map Preview Section -->
+<section id="map" class="py-16 md:py-24 lg:py-32 bg-gray-50">
+<div class="flex flex-1 justify-center">
+<div class="flex flex-col items-center max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
+<div class="text-center">
+<h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tighter">
+                            Real-Time Reports Near You
+                        </h1>
+<p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                            Stay informed about ocean-related hazards with live data from our community. Explore the map to see recent reports and stay safe.
+                        </p>
+</div>
+<div class="mt-12 w-full max-w-4xl">
+<div class="relative w-full">
+<div class="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl map-container border-4 border-white ring-1 ring-gray-200">
+<img alt="Dynamic ocean map with hazard markers" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-in-out map-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnc0wXqJv2s-lQWv_i1sZ0q5kL8_nC9mH2tJ0tSg_u_q9eRz_mX0wJ_bX-tX-wN_gMh_sVl_pPj-jS_rQ_lGqW_d-gZ_gC_fE_oA9-rPz_bX_tY_v_eQ1r_f_hY_gW_jK_lP_tQ_oN_mI_r_a_pT_y_sU_c_k"/>
+<div class="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="absolute top-[30%] left-[25%] map-marker" style="animation-delay: 0.2s;">
+<div class="relative group">
+<div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-white text-3xl">fmd_good</span>
+</div>
+<div class="absolute bottom-full mb-3 -translate-x-1/2 left-1/2 w-max bg-white p-2 rounded-lg shadow-md text-sm font-semibold text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<p class="font-bold text-red-600">Shark Sighting</p>
+<p class="text-gray-500 text-xs">2 min ago</p>
+</div>
+</div>
+</div>
+<div class="absolute top-[50%] left-[55%] map-marker" style="animation-delay: 0.4s;">
+<div class="relative group">
+<div class="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-white text-3xl">warning</span>
+</div>
+<div class="absolute bottom-full mb-3 -translate-x-1/2 left-1/2 w-max bg-white p-2 rounded-lg shadow-md text-sm font-semibold text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<p class="font-bold text-yellow-600">Strong Current</p>
+<p class="text-gray-500 text-xs">15 min ago</p>
+</div>
+</div>
+</div>
+<div class="absolute bottom-[20%] right-[30%] map-marker" style="animation-delay: 0.6s;">
+<div class="relative group">
+<div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-white text-3xl">tsunami</span>
+</div>
+<div class="absolute bottom-full mb-3 -translate-x-1/2 left-1/2 w-max bg-white p-2 rounded-lg shadow-md text-sm font-semibold text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<p class="font-bold text-blue-600">High Surf Advisory</p>
+<p class="text-gray-500 text-xs">30 min ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center mt-6">
+<button onclick="openReportModal()" class="inline-flex items-center justify-center px-10 py-5 bg-[var(--primary-color)] text-white font-bold text-xl rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+<span class="material-symbols-outlined mr-3">add_location_alt</span>
+                                Report Now
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Wave Divider -->
+<div class="relative w-full">
+  <svg class="w-full h-20 text-blue-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="currentColor" d="M0,192L48,213.3C96,235,192,277,288,277.3C384,277,480,235,576,229.3C672,224,768,256,864,256C960,256,1056,224,1152,202.7C1248,181,1344,171,1392,165.3L1440,160L1440,320L0,320Z"></path>
+  </svg>
+</div>
+
+<!-- Past Reports Section -->
+<section id="reports" class="py-16 md:py-24 lg:py-32 bg-slate-50">
+<div class="px-6 lg:px-20 xl:px-40">
+<div class="max-w-7xl mx-auto">
+<div class="mb-8">
+<h1 class="text-4xl font-bold text-gray-800 tracking-tight">Past Hazard Reports</h1>
+<p class="text-gray-500 mt-2 text-lg">Review and manage previously submitted hazard reports from our community.</p>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="md:col-span-2">
+<label class="relative block">
+<span class="sr-only">Search</span>
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="form-input block w-full rounded-md border-gray-300 pl-10 pr-4 py-3 shadow-sm focus:border-[var(--primary-color)] focus:ring focus:ring-[var(--primary-color)] focus:ring-opacity-50 placeholder-gray-400" placeholder="Search reports by type, location, or keyword..." type="text"/>
+</label>
+</div>
+<div class="flex items-center gap-4">
+<select class="form-select w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--primary-color)] focus:ring focus:ring-[var(--primary-color)] focus:ring-opacity-50 py-3">
+<option>Sort by Date</option>
+<option>Sort by Type</option>
+<option>Sort by Status</option>
+</select>
+<button class="flex items-center justify-center p-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+<span class="material-symbols-outlined text-gray-600">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-gray-50">
+<th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Hazard Type</th>
+<th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Date & Time</th>
+<th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Location</th>
+<th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Thumbnail</th>
+<th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200">
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">Shark Sighting</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">2024-12-20 14:30</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">Mumbai Beach</td>
+<td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+<div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-red-600">warning</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<span class="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">Reported</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">Strong Current</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">2024-12-19 09:00</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">Juhu Beach</td>
+<td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+<div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-600">waves</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">Resolved</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">Oil Spill</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">2024-12-18 16:45</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">Gateway Area</td>
+<td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-600">water_drop</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<span class="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800">In Progress</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">Marine Debris</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">2024-12-17 11:15</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">Versova Beach</td>
+<td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+<div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-600">delete</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<span class="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">Reported</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">Jellyfish Swarm</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">2024-12-15 18:00</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">Marine Drive</td>
+<td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+<div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-purple-600">pest_control</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">Resolved</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between mt-6 px-6">
+<span class="text-sm text-gray-500">Showing 1 to 5 of 20 reports</span>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">Previous</button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-[var(--primary-color)] border border-[var(--primary-color)] rounded-md hover:bg-blue-700 transition-colors">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Wave Divider -->
+<div class="relative w-full">
+  <svg class="w-full h-20 text-blue-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="currentColor" d="M0,192L48,213.3C96,235,192,277,288,277.3C384,277,480,235,576,229.3C672,224,768,256,864,256C960,256,1056,224,1152,202.7C1248,181,1344,171,1392,165.3L1440,160L1440,320L0,320Z"></path>
+  </svg>
+</div>
+
+<!-- About Section -->
+<section id="about" class="flex flex-1 flex-col items-center justify-center bg-slate-50 px-4 py-20 lg:py-24">
+  <div class="flex max-w-4xl flex-col items-center gap-12 text-center">
+    <div class="flex flex-col items-center gap-6">
+      <h1 class="text-5xl font-bold tracking-tighter text-slate-900 md:text-6xl">Making Our Oceans Safer, Together.</h1>
+      <p class="max-w-3xl text-lg text-slate-600 md:text-xl">
+        OceanIQ is a community-driven platform for real-time ocean hazard reporting. 
+        We empower sailors, surfers, researchers, and maritime industries with the data they need to navigate the waters safely and responsibly.
+      </p>
+    </div>
+    <div class="flex flex-col gap-8 md:flex-row">
+      <div class="flex flex-col items-center gap-4 rounded-lg bg-white p-8 shadow-sm transition-shadow hover:shadow-lg">
+        <div class="text-5xl text-blue-600">
+          <span class="material-symbols-outlined">visibility</span>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900">Our Mission</h3>
+        <p class="text-slate-600">
+          To provide a comprehensive, accessible platform for reporting and viewing ocean hazards, preventing incidents and protecting both lives and marine ecosystems.
+        </p>
+      </div>
+      <div class="flex flex-col items-center gap-4 rounded-lg bg-white p-8 shadow-sm transition-shadow hover:shadow-lg">
+        <div class="text-5xl text-blue-600">
+          <span class="material-symbols-outlined">groups</span>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900">Our Approach</h3>
+        <p class="text-slate-600">
+          We harness the collective power of the ocean community. By combining user-submitted reports with advanced data analysis, we create a dynamic, real-time map of potential dangers.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="bg-slate-800 text-white py-12">
+  <div class="max-w-7xl mx-auto px-6 lg:px-20 flex flex-col md:flex-row justify-between gap-8">
+    <!-- Logo / Brand -->
+    <div class="flex flex-col gap-4">
+      <h2 class="text-2xl font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-400">water</span>
+        OceanIQ
+      </h2>
+      <p class="text-gray-400 max-w-sm">
+        Crowdsourced early warning system for ocean hazards. Join our community and stay safe.
+      </p>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-lg font-bold mb-2">Navigation</h3>
+      <a href="#home" class="hover:text-blue-400 transition-colors">Home</a>
+      <a href="#map" class="hover:text-blue-400 transition-colors">Map</a>
+      <a href="#reports" class="hover:text-blue-400 transition-colors">Past Reports</a>
+      <a href="#about" class="hover:text-blue-400 transition-colors">About</a>
+    </div>
+
+    <!-- Contact / Socials -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-lg font-bold mb-2">Contact</h3>
+      <p class="text-gray-400">support@oceaniq.com</p>
+      <div class="flex gap-4 mt-2">
+        <a href="#" class="hover:text-blue-400 transition-colors">
+          <span class="material-symbols-outlined">facebook</span>
+        </a>
+        <a href="#" class="hover:text-blue-400 transition-colors">
+          <span class="material-symbols-outlined">twitter</span>
+        </a>
+        <a href="#" class="hover:text-blue-400 transition-colors">
+          <span class="material-symbols-outlined">instagram</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom copyright -->
+  <div class="mt-8 border-t border-gray-700 pt-6 text-center text-gray-400 text-sm">
+    &copy; 2025 OceanIQ. All rights reserved.
+  </div>
+</footer>
+
+<!-- Report Modal -->
+<div id="reportModal" class="modal">
+<div class="modal-content p-8">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-3xl font-extrabold text-slate-900">Report a Hazard</h2>
+<button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<p class="text-sm text-slate-600 mb-6">Help us keep the oceans safe by reporting any potential dangers.</p>
+
+<form id="reportForm" class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-slate-700 mb-2" for="hazard-upload">Upload Media</label>
+<div class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-slate-300 border-dashed rounded-md">
+<div class="space-y-2 text-center">
+<span class="material-symbols-outlined text-5xl text-slate-400">cloud_upload</span>
+<div class="flex text-sm text-slate-600">
+<label class="relative cursor-pointer bg-white rounded-md font-medium text-[var(--primary-color)] hover:text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[var(--primary-color)]" for="file-upload">
+<span>Upload a file</span>
+<input class="sr-only" id="file-upload" name="file-upload" type="file"/>
+</label>
+<p class="pl-1">or drag and drop</p>
+</div>
+<p class="text-xs text-slate-500">Videos or images up to 100MB</p>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-700" for="description">Description</label>
+<div class="mt-1">
+<textarea class="form-input" id="description" name="description" placeholder="Describe the hazard in detail. Include location, time, and any other relevant information." rows="6"></textarea>
+</div>
+</div>
+<div class="flex justify-end pt-2">
+<button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[var(--primary-color)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] transition-colors">
+<span class="material-symbols-outlined mr-2">send</span>
+                                Submit Report
+                            </button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="confirmation-modal">
+<div class="confirmation-modal-overlay"></div>
+<div class="confirmation-modal-content">
+<button onclick="closeConfirmationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex flex-col items-center">
+<div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+<span class="material-symbols-outlined text-4xl text-green-600">check_circle</span>
+</div>
+<h3 class="text-2xl font-bold text-slate-900 mb-2">Report Submitted Successfully!</h3>
+<p class="text-sm text-slate-600 mb-6">Thank you for helping us keep the oceans safe.</p>
+<div class="flex flex-col sm:flex-row gap-4 w-full">
+<button onclick="viewMyReport()" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[var(--primary-color)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] transition-colors">
+                        View My Report
+                    </button>
+<button onclick="returnToHome()" class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-slate-300 text-base font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] transition-colors">
+                        Return to Home
+                    </button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<script>
+        const navbar = document.getElementById('navbar');
+        const body = document.body;
+        
+        // Navbar scroll effect
+        window.onscroll = function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+                navbar.classList.remove('text-white');
+                navbar.classList.add('text-slate-800');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+                navbar.classList.add('text-white');
+                navbar.classList.remove('text-slate-800');
+            }
+        };
+
+        
+        // Report Modal functions
+        function openReportModal() {
+            document.getElementById('reportModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Confirmation Modal functions
+        function openConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function viewMyReport() {
+    closeConfirmationModal();
+
+    // Scroll smoothly to Past Reports
+    const reportsSection = document.getElementById("reports");
+    if (reportsSection) {
+        reportsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+        console.warn("Past Reports section not found!");
+    }
+}
+
+        function returnToHome() {
+            closeConfirmationModal();
+            // Scroll to hero section
+            const heroSection = document.getElementById("home");
+            if (heroSection) {
+                heroSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent actual form submission
+            
+            // Close the report modal
+            closeReportModal();
+            
+            // Show confirmation modal
+            openConfirmationModal();
+        });
+
+        // Close modals when clicking outside
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportModal();
+            }
+        });
+
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this || e.target.classList.contains('confirmation-modal-overlay')) {
+                closeConfirmationModal();
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+                closeConfirmationModal();
+            }
+        });
+        
+       
+    </script>
+
+</body></html>
